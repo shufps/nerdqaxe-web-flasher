@@ -7,11 +7,13 @@ import { ESPLoader, Transport } from 'esptool-js'
 import { useTranslation } from 'react-i18next'
 import Header from './Header'
 import InstructionPanel from './InstructionPanel'
+import NVSPartitionGenerator from './nvm'
 import Selector from './Selector'
 import device_data from './firmware_data.json'
 
 import { Terminal } from '@xterm/xterm';
 import '@xterm/xterm/css/xterm.css';
+import NvsGeneratorComponent from './NvsGeneratorComponent'
 
 export default function LandingHero() {
   const { t } = useTranslation();
@@ -572,6 +574,8 @@ export default function LandingHero() {
         </div>
       </section>
       <InstructionPanel isOpen={isPanelOpen} onClose={() => setIsPanelOpen(false)} />
+
+      <NvsGeneratorComponent/>
     </>
   )
 }
