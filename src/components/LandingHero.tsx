@@ -7,7 +7,6 @@ import { ESPLoader, Transport } from 'esptool-js'
 import { useTranslation } from 'react-i18next'
 import Header from './Header'
 import InstructionPanel from './InstructionPanel'
-import NVSPartitionGenerator from './nvm'
 import Selector from './Selector'
 import device_data from './firmware_data.json'
 
