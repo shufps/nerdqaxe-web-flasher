@@ -349,30 +349,31 @@ export default function LandingHero() {
 
       await loader.main();
 
-      // Fetch the SHA256 hash for the selected binary
+      // Construct R2 download URL instead of using GitHub + corsproxy
       const firmwareUrl = firmwareData.assets[0].browser_download_url;
-      const binaryName = decodeURIComponent(firmwareUrl.split('/').pop()); // Extract the binary name
+      const binaryName = decodeURIComponent(firmwareUrl.split('/').pop()); // e.g. esp-miner-factory-NerdAxe-v1.0.29.1.bin
+      const r2BaseUrl = 'https://pub-4d5436f8cf244b3dab75974d0138a132.r2.dev';
+
+      const r2Url = `${r2BaseUrl}/${selectedFirmware}/${binaryName}`;
+
+      console.log(`Downloading firmware from R2: ${r2Url}`);
+
+      // Fetch SHA256 from GitHub release body (still valid)
       const sha256Hash = await fetchSHA256Hash(device.repository, selectedFirmware, binaryName);
 
       if (sha256Hash) {
-        console.log(`found sha256 hash: ${sha256Hash}`);
+        console.log(`Found SHA256 hash: ${sha256Hash}`);
       } else {
-        console.log('no sha256 hash found');
+        console.warn('No SHA256 hash found');
       }
 
       setStatus(t('status.downloadFirmware'));
 
-      // hard-coded, let's see how it goes :see-no-evil:
-      // We added a SHA-256 hash verification step to validate the integrity of
-      // the downloaded binary. This step compares its hash against the (hidden)
-      // hashes provided on the GitHub release page for each factory file.
-      // This ensures that the proxy is not acting as a "man-in-the-middle" by
-      // tampering with the files and mitigates potential security risks.
-      const proxyUrl = 'https://corsproxy.io/?url=';
-      const firmwareResponse = await fetch(proxyUrl + firmwareUrl);
+      const firmwareResponse = await fetch(r2Url);
       if (!firmwareResponse.ok) {
-        throw new Error('Failed to download firmware');
+        throw new Error(`Failed to download firmware from R2 (status ${firmwareResponse.status})`);
       }
+
       const firmwareArrayBuffer = await firmwareResponse.arrayBuffer();
 
       // Compare the calculated hash with the fetched hash
