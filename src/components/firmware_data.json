@@ -44,6 +44,11 @@
             "name": "NerdEKO (12 x BM1370)",
             "repository": "https://github.com/shufps/ESP-Miner-NerdQAxePlus",
             "file": "NerdEKO"
+        },
+        {
+            "name": "Q1373 (4 x BM1373)",
+            "repository": "https://github.com/shufps/ESP-Miner-NerdQAxePlus",
+            "file": "Q1373"
         }
     ]
 }
