@@ -65,11 +65,6 @@ export default function LandingHero() {
     };
   }, [isLogging, t]);
 
-  const devices = device_data.devices;
-  const device = selectedDevice !== ''
-    ? devices.find(d => d.name == selectedDevice)!
-    : { "name": "", "repository": "", "file": ""};
-
   // Helper function to extract GitHub repository details
   const parseGitHubRepo = (repositoryUrl: string) => {
     const repoMatch = repositoryUrl.match(/github\.com\/([^/]+)\/([^/]+)/);
@@ -85,40 +80,11 @@ export default function LandingHero() {
     return response.json();
   };
 
-  // Extract the SHA256 hash from the release notes
-  const extractSHA256Hash = (releaseBody: string, binaryName: string) => {
-    //console.log(releaseBody);
-    //console.log(binaryName);
-    const lines = (releaseBody || '').split('\n');
-    for (const line of lines) {
-      if (line.includes(binaryName)) {
-        const parts = line.split(/\s+/);
-        if (parts.length > 1 && parts[1] === binaryName) {
-          return parts[0]; // Return the first part as the hash
-        }
-      }
-    }
-    return null;
-  };
-
   const calculateSHA256 = async (data: ArrayBuffer) => {
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     return Array.from(new Uint8Array(hashBuffer))
       .map((byte) => byte.toString(16).padStart(2, '0'))
       .join('');
-  };
-
-  // Fetch the SHA256 hash for a specific binary
-  const fetchSHA256Hash = async (repositoryUrl: string, versionTag: string, binaryName: string) => {
-    try {
-      const { owner, repo } = parseGitHubRepo(repositoryUrl);
-      const apiUrl = `https://api.github.com/repos/${owner}/${repo}/releases/tags/${versionTag}`;
-      const release = await fetchGitHubAPI(apiUrl);
-      return extractSHA256Hash(release.body, binaryName);
-    } catch (error) {
-      console.error('Error fetching SHA256 hash:', error);
-      return null;
-    }
   };
 
   // Fetch filtered releases from GitHub.
@@ -361,8 +327,12 @@ export default function LandingHero() {
 
       console.log(`Downloading firmware from R2: ${r2Url}`);
 
-      // Fetch SHA256 from GitHub release body (still valid)
-      const sha256Hash = await fetchSHA256Hash(device.repository, selectedFirmware, binaryName);
+      // GitHub computes the sha256 of every release asset and exposes it as
+      // asset.digest = "sha256:<hex>" (since 2025-06). It's already part of the
+      // asset object fetched in fetchReleases, so no extra API call / body
+      // parsing is needed.
+      const digest = firmwareData.assets[0].digest as string | undefined;
+      const sha256Hash = digest?.startsWith('sha256:') ? digest.slice(7) : null;
 
       if (sha256Hash) {
         console.log(`Found SHA256 hash: ${sha256Hash}`);
