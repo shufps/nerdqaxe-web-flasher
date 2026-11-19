@@ -25,7 +25,10 @@
       "stopLogging": "Stop Logging",
       "downloadLogs": "Download Logs",
       "loggingDescription": "Connect your device, log the serial data and download it later on.",
-      "keepConfig": "Keep configuration"
+      "keepConfig": "Keep configuration",
+      "loadingReleases": "Loading releases...",
+      "noReleases": "No releases available for this device yet.",
+      "noStableReleases": "No stable release for this device yet. Try \"Show Pre-Releases\"."
     },
     "features": {
       "title": "Key Features",
@@ -73,5 +76,43 @@
         "title": "Browser Compatibility Error",
         "description": "This application requires a Chromium-based browser (such as Google Chrome, Microsoft Edge, or Brave) to function properly. Please switch to a compatible browser and try again."
       }
+    },
+    "variant": {
+      "label": "Firmware",
+      "stable": "stable",
+      "experimental": "experimental",
+      "whyRust": "Why Rust?"
+    },
+    "rustInfo": {
+      "new": "NEW",
+      "teaser": "The firmware is now also available in Rust",
+      "title": "The firmware, rewritten in Rust",
+      "intro": "The complete firmware has been ported from C/C++ to Rust. Rust is a modern systems language whose compiler catches whole classes of bugs before the code ever runs on your miner.",
+      "points": {
+        "memorySafety": {
+          "title": "Memory safe.",
+          "description": "Buffer overflows, null pointer dereferences and use-after-free bugs are ruled out by the compiler instead of crashing your device."
+        },
+        "bugsFixed": {
+          "title": "Dozens of bugs fixed.",
+          "description": "Porting the code turned up bugs in the C version, including crashes and security issues. 36 of them are fixed in the Rust version."
+        },
+        "sameFeatures": {
+          "title": "Same features, same settings.",
+          "description": "Same web interface (AxeOS), same configuration. With \"Keep configuration\" your settings stay as they are."
+        },
+        "switchBack": {
+          "title": "Switch back anytime.",
+          "description": "Changed your mind? Flash the C/C++ version again right here."
+        }
+      },
+      "experimentalNote": "The Rust version is still experimental. Some parts have not been tested on every board yet. If something doesn't work, please let us know:",
+      "reportIssues": "report an issue",
+      "tryRust": "Try Rust",
+      "close": "Maybe later",
+      "active": "Rust firmware selected",
+      "switchBack": "back to C/C++",
+      "rustSelected": "Rust selected",
+      "ok": "Close"
     }
   }

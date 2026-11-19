@@ -8,10 +8,14 @@ import { useTranslation } from 'react-i18next'
 import Header from './Header'
 import InstructionPanel from './InstructionPanel'
 import Selector from './Selector'
+import FirmwareVariantToggle, { FirmwareVariant } from './FirmwareVariantToggle'
+import RustInfoDialog from './RustInfoDialog'
 import device_data from './firmware_data.json'
 
 import { Terminal } from '@xterm/xterm';
 import '@xterm/xterm/css/xterm.css';
+
+const RUST_INFO_SEEN_KEY = 'rustInfoSeen';
 
 export default function LandingHero() {
   const { t } = useTranslation();
@@ -34,6 +38,16 @@ export default function LandingHero() {
   const logsRef = useRef<string>('')
   const [keepConfig, setKeepConfig] = useState(true);
   const [showPreReleases, setShowPreReleases] = useState(false);
+  const [selectedVariant, setSelectedVariant] = useState('cpp');
+  const [isRustInfoOpen, setIsRustInfoOpen] = useState(false);
+  const [isLoadingReleases, setIsLoadingReleases] = useState(false);
+
+  const device = device_data.devices.find((d) => d.name === selectedDevice);
+  const deviceVariants: FirmwareVariant[] = device
+    ? device_data.variants.filter((v) => device.variants.includes(v.id))
+    : [];
+  const variant = deviceVariants.find((v) => v.id === selectedVariant) ?? deviceVariants[0];
+  const rustVariant = device_data.variants.find((v) => v.id === 'rust');
 
   useEffect(() => {
     const userAgent = navigator.userAgent.toLowerCase();
@@ -114,23 +128,48 @@ export default function LandingHero() {
     }
   };
 
-  // Update firmware options whenever the selected device or showPreReleases changes
+  // Update firmware options whenever the selected device, variant or showPreReleases changes.
+  // The selected version is reset, so a version of one variant is never flashed
+  // from the other variant's release list.
   useEffect(() => {
+    let cancelled = false;
+    setSelectedFirmware('');
+    setFirmwareOptions([]);
+
     const updateFirmwareOptions = async () => {
-      if (!selectedDevice) {
-        setFirmwareOptions([]);
+      if (!device || !variant) {
+        setIsLoadingReleases(false);
         return;
       }
 
-      const device = device_data.devices.find((d) => d.name === selectedDevice);
-      if (device) {
-        const firmwareData = await fetchReleases(device.repository, device.file);
+      setIsLoadingReleases(true);
+      const firmwareData = await fetchReleases(variant.repository, device.file);
+      if (!cancelled) {
         setFirmwareOptions(firmwareData);
+        setIsLoadingReleases(false);
       }
     };
 
     updateFirmwareOptions();
-  }, [selectedDevice, showPreReleases]);
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedDevice, variant?.id, showPreReleases]);
+
+  const handleVariantChange = (variantId: string) => {
+    setSelectedVariant(variantId);
+    if (variantId !== 'rust') return;
+
+    // Show the Rust info once, the first time Rust is picked
+    let seen = false;
+    try {
+      seen = localStorage.getItem(RUST_INFO_SEEN_KEY) === '1';
+      localStorage.setItem(RUST_INFO_SEEN_KEY, '1');
+    } catch {
+      // storage not available, show the info every time
+    }
+    if (!seen) setIsRustInfoOpen(true);
+  };
 
   const handleConnect = async () => {
     setIsConnecting(true)
@@ -276,7 +315,7 @@ export default function LandingHero() {
     }
 
     const firmwareData = firmwareOptions.find(f => f.version === selectedFirmware);
-    if (!firmwareData || firmwareData.assets.length === 0) {
+    if (!firmwareData || firmwareData.assets.length === 0 || !variant?.r2BaseUrl) {
       setStatus(t('status.firmwareNotFound'));
       return;
     }
@@ -303,11 +342,12 @@ export default function LandingHero() {
         romBaudrate: 115200,
         terminal: {
           clean() { },
+          // esptool output goes to the browser console to debug connection problems
           writeLine(data: string) {
-            // setStatus(data);
+            console.log(`[esptool] ${data}`);
           },
           write(data: string) {
-            // setStatus(data);
+            console.log(`[esptool] ${data}`);
           },
         },
       });
@@ -321,9 +361,8 @@ export default function LandingHero() {
       // This ensures that the files on R2 are what was generated in the github workflow.
       const firmwareUrl = firmwareData.assets[0].browser_download_url;
       const binaryName = decodeURIComponent(firmwareUrl.split('/').pop()); // e.g. esp-miner-factory-NerdAxe-v1.0.29.1.bin
-      const r2BaseUrl = 'https://pub-4d5436f8cf244b3dab75974d0138a132.r2.dev';
-
-      const r2Url = `${r2BaseUrl}/${selectedFirmware}/${binaryName}`;
+      // each firmware variant has its own R2 bucket
+      const r2Url = `${variant.r2BaseUrl}/${selectedFirmware}/${binaryName}`;
 
       console.log(`Downloading firmware from R2: ${r2Url}`);
 
@@ -470,6 +509,31 @@ export default function LandingHero() {
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
                 {t('hero.description')}
               </p>
+              {selectedVariant === 'rust' ? (
+                <div className="inline-flex items-center gap-3 rounded-full bg-orange-600 py-1 pl-3 pr-1 text-sm text-white shadow">
+                  <button type="button" onClick={() => setIsRustInfoOpen(true)} className="inline-flex items-center gap-2 font-medium hover:underline">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-xs">🦀</span>
+                    {t('rustInfo.active')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedVariant('cpp')}
+                    disabled={isFlashing}
+                    className="rounded-full bg-white/20 px-2 py-0.5 text-xs hover:bg-white/30 disabled:opacity-50"
+                  >
+                    {t('rustInfo.switchBack')}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsRustInfoOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-full border border-orange-300 bg-orange-50 px-3 py-1 text-sm text-orange-800 hover:bg-orange-100 dark:border-orange-800 dark:bg-orange-950/40 dark:text-orange-200 dark:hover:bg-orange-950/70"
+                >
+                  <span className="rounded-full bg-orange-600 px-2 py-0.5 text-xs font-semibold text-white">{t('rustInfo.new')}</span>
+                  🦀 {t('rustInfo.teaser')}
+                </button>
+              )}
             </div>
             <div className="w-full max-w-sm space-y-2">
               <Button
@@ -485,13 +549,30 @@ export default function LandingHero() {
                 values={device_data.devices.map((d) => d.name)}
                 onValueChange={setSelectedDevice}
               />
-              {selectedDevice && (
-                <Selector
-                  placeholder={t('hero.selectFirmware')}
-                  values={firmwareOptions.map((f) => f.version)}
-                  onValueChange={setSelectedFirmware}
+              {selectedDevice && deviceVariants.length > 1 && (
+                <FirmwareVariantToggle
+                  variants={deviceVariants}
+                  value={variant?.id ?? ''}
+                  onValueChange={handleVariantChange}
+                  onShowInfo={() => setIsRustInfoOpen(true)}
                   disabled={isConnecting || isFlashing}
                 />
+              )}
+              {selectedDevice && (
+                <Selector
+                  // remount to show the placeholder again after the version was reset
+                  key={`${selectedDevice}-${variant?.id}-${showPreReleases}`}
+                  placeholder={isLoadingReleases ? t('hero.loadingReleases') : t('hero.selectFirmware')}
+                  values={firmwareOptions.map((f) => f.version)}
+                  value={selectedFirmware}
+                  onValueChange={setSelectedFirmware}
+                  disabled={isConnecting || isFlashing || isLoadingReleases || firmwareOptions.length === 0}
+                />
+              )}
+              {selectedDevice && !isLoadingReleases && firmwareOptions.length === 0 && (
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {showPreReleases ? t('hero.noReleases') : t('hero.noStableReleases')}
+                </p>
               )}
               <div className="flex items-center justify-between">
                 <div>
@@ -522,7 +603,7 @@ export default function LandingHero() {
               <Button
                 className="w-full"
                 onClick={handleStartFlashing}
-                disabled={!selectedDevice || isConnecting || isFlashing || !isConnected}
+                disabled={!selectedDevice || !selectedFirmware || isConnecting || isFlashing || !isConnected}
               >
                 {isFlashing ? t('hero.flashing') : t('hero.startFlashing')}
                 <Zap className="ml-2 h-4 w-4" />
@@ -560,6 +641,18 @@ export default function LandingHero() {
         </div>
       </section>
       <InstructionPanel isOpen={isPanelOpen} onClose={() => setIsPanelOpen(false)} />
+      {rustVariant && (
+        <RustInfoDialog
+          isOpen={isRustInfoOpen}
+          onClose={() => setIsRustInfoOpen(false)}
+          onTryRust={() => {
+            setSelectedVariant('rust');
+            setIsRustInfoOpen(false);
+          }}
+          repository={rustVariant.repository}
+          isRustSelected={selectedVariant === 'rust'}
+        />
+      )}
     </>
   )
 }
