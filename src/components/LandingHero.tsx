@@ -508,14 +508,31 @@ export default function LandingHero() {
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
                 {t('hero.description')}
               </p>
-              <button
-                type="button"
-                onClick={() => setIsRustInfoOpen(true)}
-                className="inline-flex items-center gap-2 rounded-full border border-orange-300 bg-orange-50 px-3 py-1 text-sm text-orange-800 hover:bg-orange-100 dark:border-orange-800 dark:bg-orange-950/40 dark:text-orange-200 dark:hover:bg-orange-950/70"
-              >
-                <span className="rounded-full bg-orange-600 px-2 py-0.5 text-xs font-semibold text-white">{t('rustInfo.new')}</span>
-                🦀 {t('rustInfo.teaser')}
-              </button>
+              {selectedVariant === 'rust' ? (
+                <div className="inline-flex items-center gap-3 rounded-full bg-orange-600 py-1 pl-3 pr-1 text-sm text-white shadow">
+                  <button type="button" onClick={() => setIsRustInfoOpen(true)} className="inline-flex items-center gap-2 font-medium hover:underline">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-xs">🦀</span>
+                    {t('rustInfo.active')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedVariant('cpp')}
+                    disabled={isFlashing}
+                    className="rounded-full bg-white/20 px-2 py-0.5 text-xs hover:bg-white/30 disabled:opacity-50"
+                  >
+                    {t('rustInfo.switchBack')}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsRustInfoOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-full border border-orange-300 bg-orange-50 px-3 py-1 text-sm text-orange-800 hover:bg-orange-100 dark:border-orange-800 dark:bg-orange-950/40 dark:text-orange-200 dark:hover:bg-orange-950/70"
+                >
+                  <span className="rounded-full bg-orange-600 px-2 py-0.5 text-xs font-semibold text-white">{t('rustInfo.new')}</span>
+                  🦀 {t('rustInfo.teaser')}
+                </button>
+              )}
             </div>
             <div className="w-full max-w-sm space-y-2">
               <Button
@@ -632,6 +649,7 @@ export default function LandingHero() {
             setIsRustInfoOpen(false);
           }}
           repository={rustVariant.repository}
+          isRustSelected={selectedVariant === 'rust'}
         />
       )}
     </>

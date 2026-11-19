@@ -8,11 +8,12 @@ interface RustInfoDialogProps {
   onClose: () => void;
   onTryRust: () => void;
   repository: string;
+  isRustSelected: boolean;
 }
 
 const points = ['memorySafety', 'bugsFixed', 'sameFeatures', 'switchBack'];
 
-export default function RustInfoDialog({ isOpen, onClose, onTryRust, repository }: RustInfoDialogProps) {
+export default function RustInfoDialog({ isOpen, onClose, onTryRust, repository, isRustSelected }: RustInfoDialogProps) {
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -71,11 +72,15 @@ export default function RustInfoDialog({ isOpen, onClose, onTryRust, repository 
           </a>
         </div>
         <div className="flex gap-2">
-          <Button className="flex-1 bg-orange-600 text-white hover:bg-orange-700" onClick={onTryRust}>
-            {t('rustInfo.tryRust')}
+          <Button
+            className="flex-1 bg-orange-600 text-white hover:bg-orange-700 disabled:opacity-100"
+            onClick={onTryRust}
+            disabled={isRustSelected}
+          >
+            {isRustSelected ? `✓ ${t('rustInfo.rustSelected')}` : t('rustInfo.tryRust')}
           </Button>
           <Button className="flex-1" variant="outline" onClick={onClose}>
-            {t('rustInfo.close')}
+            {isRustSelected ? t('rustInfo.ok') : t('rustInfo.close')}
           </Button>
         </div>
       </div>

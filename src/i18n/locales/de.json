@@ -109,6 +109,10 @@
       "experimentalNote": "Die Rust-Version ist noch experimentell. Manche Teile sind noch nicht auf jedem Board getestet. Wenn etwas nicht funktioniert, sag uns bitte Bescheid:",
       "reportIssues": "Issue melden",
       "tryRust": "Rust ausprobieren",
-      "close": "Vielleicht später"
+      "close": "Vielleicht später",
+      "active": "Rust-Firmware ausgewählt",
+      "switchBack": "zurück zu C/C++",
+      "rustSelected": "Rust ausgewählt",
+      "ok": "Schließen"
     }
   }
