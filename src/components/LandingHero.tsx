@@ -342,11 +342,12 @@ export default function LandingHero() {
         romBaudrate: 115200,
         terminal: {
           clean() { },
+          // esptool output goes to the browser console to debug connection problems
           writeLine(data: string) {
-            // setStatus(data);
+            console.log(`[esptool] ${data}`);
           },
           write(data: string) {
-            // setStatus(data);
+            console.log(`[esptool] ${data}`);
           },
         },
       });
