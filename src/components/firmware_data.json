@@ -9,7 +9,7 @@
         {
             "id": "rust",
             "label": "Rust",
-            "repository": "https://github.com/shufps/ESP-Miner-NerdQAxePlus-rs",
+            "repository": "https://github.com/shufps/nerd-os-rs",
             "r2BaseUrl": "https://pub-5da8c341e16d4c3c871276f0080fbf42.r2.dev",
             "experimental": true
         }
