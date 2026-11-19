@@ -25,7 +25,10 @@
       "stopLogging": "Logging stoppen",
       "downloadLogs": "Logs herunterladen",
       "loggingDescription": "Verbinde dein Gerät, protokolliere die seriellen Daten und lade diese später herunter.",
-      "keepConfig": "Konfiguration behalten"
+      "keepConfig": "Konfiguration behalten",
+      "loadingReleases": "Lade Releases...",
+      "noReleases": "Für dieses Gerät gibt es noch keine Releases.",
+      "noStableReleases": "Für dieses Gerät gibt es noch kein stabiles Release. Probier \"Show Pre-Releases\"."
     },
     "features": {
       "title": "Funktionen",
@@ -73,5 +76,39 @@
         "title": "Browser-Kompatibilitätsfehler",
         "description": "Diese Anwendung benötigt einen Chromium-basierten Browser (wie Google Chrome, Microsoft Edge oder Brave), um ordnungsgemäß zu funktionieren. Bitte wechseln Sie zu einem kompatiblen Browser und versuchen Sie es erneut."
       }
+    },
+    "variant": {
+      "label": "Firmware",
+      "stable": "stabil",
+      "experimental": "experimentell",
+      "whyRust": "Warum Rust?"
+    },
+    "rustInfo": {
+      "new": "NEU",
+      "teaser": "Die Firmware gibt es jetzt auch in Rust",
+      "title": "Die Firmware, neu geschrieben in Rust",
+      "intro": "Die komplette Firmware wurde von C/C++ nach Rust portiert. Rust ist eine moderne Systemsprache, deren Compiler ganze Klassen von Fehlern findet, bevor der Code überhaupt auf deinem Miner läuft.",
+      "points": {
+        "memorySafety": {
+          "title": "Speichersicher.",
+          "description": "Buffer Overflows, Null-Pointer-Zugriffe und Use-after-free schließt der Compiler aus, statt dass dein Gerät abstürzt."
+        },
+        "bugsFixed": {
+          "title": "Dutzende Bugs behoben.",
+          "description": "Beim Portieren sind Fehler in der C-Version aufgefallen, darunter Abstürze und Sicherheitslücken. 36 davon sind in der Rust-Version behoben."
+        },
+        "sameFeatures": {
+          "title": "Gleiche Funktionen, gleiche Einstellungen.",
+          "description": "Gleiche Weboberfläche (AxeOS), gleiche Konfiguration. Mit \"Konfiguration behalten\" bleiben deine Einstellungen erhalten."
+        },
+        "switchBack": {
+          "title": "Jederzeit zurück.",
+          "description": "Doch nicht? Einfach hier wieder die C/C++-Version flashen."
+        }
+      },
+      "experimentalNote": "Die Rust-Version ist noch experimentell. Manche Teile sind noch nicht auf jedem Board getestet. Wenn etwas nicht funktioniert, sag uns bitte Bescheid:",
+      "reportIssues": "Issue melden",
+      "tryRust": "Rust ausprobieren",
+      "close": "Vielleicht später"
     }
   }
